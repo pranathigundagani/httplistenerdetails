@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="c1315afb-d9bc-4ec7-9608-43c43f60820b" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="f409aa0b-91d3-4023-8f8d-cfce42572f3f" >
+		<http:request-connection host="welcomepranathi.us-e2.cloudhub.io" />
+	</http:request-config>
+	<flow name="httplistenerdetailsFlow" doc:id="a098ba22-94d7-4830-adc5-1c11c8b2746b" >
+		<http:listener doc:name="Listener" doc:id="1165f2fa-603e-449e-a35f-8e96a3bd94e9" config-ref="HTTP_Listener_config" path="/listener"/>
+		<set-variable value="#[uuid()]" doc:name="Set Variable" doc:id="7147e561-02fc-45fd-98ef-e9e55ca8447d" variableName="Correlationid"/>
+		<logger level="INFO" doc:name="Logger" doc:id="adb4a3b7-4020-40fa-a7ad-92ffa5c2ed82" message="Correlationid - #[vars.Correlationid]"/>
+		<ee:transform doc:name="Transform Message" doc:id="fe5aa4b4-eaf7-40db-9152-26258f1f4fe1" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	EMPNAME : "Pranathi",
+	EMPLOC  : "HYDERABAD"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="b119ab8f-c995-40e2-afc0-d191c15966aa" message="Correlationid - #[vars.Correlationid] - received payload"/>
+		<http:request method="POST" doc:name="Request" doc:id="9f13524a-6ff5-4e30-b979-ea1b28220825" config-ref="HTTP_Request_configuration" path="/welcome" outputMimeType="application/json" target="response">
+		</http:request>
+		<logger level="INFO" doc:name="Logger" doc:id="d24adf18-30fc-47ab-a6bc-d53b479814c8" message="Correlationid - #[vars.Correlationid] - response received - #[vars.response]"/>
+	</flow>
+</mule>
